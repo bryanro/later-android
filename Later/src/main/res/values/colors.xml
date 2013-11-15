@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_secondary_text">#676767</color>
+    <color name="color_links">#006DB4</color>
+    <color name="color_darkgrey">#060606</color>
+</resources>

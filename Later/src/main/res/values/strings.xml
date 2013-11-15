@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Later</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_receive_share">Later</string>
+    <string name="filter_prompt">Filter</string>
+    <string name="item_added_successful">Item added to Later</string>
+    <string name="item_added_fail">Error adding item to Later. Please try again.</string>
+    <string-array name="filter_array">
+        <item>Unread</item>
+        <item>All</item>
+        <item>Read</item>
+    </string-array>
+
+</resources>
