@@ -35,8 +35,6 @@ public class MainActivity extends ListActivity {
     private LaterListCursorAdapter cursorAdapter;
     private boolean firstOnResume;
 
-    private MenuItem menuShowAll;
-    private MenuItem menuShowUnread;
     private MenuItem menuSpinnerItem;
 
     @Override
@@ -58,9 +56,6 @@ public class MainActivity extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-
-        menuShowAll = menu.findItem(R.id.menu_showall);
-        menuShowUnread = menu.findItem(R.id.menu_showunread);
 
         menuSpinnerItem = menu.findItem(R.id.menu_spinner_view);
         Spinner spinner = (Spinner) menuSpinnerItem.getActionView().findViewById(R.id.spinner_filter);
@@ -106,20 +101,6 @@ public class MainActivity extends ListActivity {
             case R.id.action_settings:
                 return true;
             case R.id.menu_refresh: {
-                refreshList();
-                break;
-            }
-            case R.id.menu_showall: {
-                dataSource.setFilter(LaterListDataSource.Filter.ALL);
-                menuShowAll.setVisible(false);
-                menuShowUnread.setVisible(true);
-                refreshList();
-                break;
-            }
-            case R.id.menu_showunread: {
-                dataSource.setFilter(LaterListDataSource.Filter.UNREAD);
-                menuShowAll.setVisible(true);
-                menuShowUnread.setVisible(false);
                 refreshList();
                 break;
             }

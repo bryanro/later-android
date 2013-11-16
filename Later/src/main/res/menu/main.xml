@@ -1,22 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+    Determined that the refresh button isn't really needed anymore since the app automatically refreshes in the onResume function.
+    -->
     <item android:id="@+id/menu_refresh"
         android:title="Refresh"
         android:icon="@android:drawable/stat_notify_sync"
         android:orderInCategory="50"
-        android:showAsAction="always"
-        />
-
-    <item android:id="@+id/menu_showall"
-        android:title="Show All"
-        android:orderInCategory="40"
-        android:showAsAction="always"
-        android:visible="false"
-        />
-
-    <item android:id="@+id/menu_showunread"
-        android:title="Show Unread"
-        android:orderInCategory="30"
         android:showAsAction="always"
         android:visible="false"
         />
