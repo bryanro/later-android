@@ -1,5 +1,6 @@
 package com.bryankrosenbaum.later.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
@@ -26,7 +27,7 @@ import com.bryankrosenbaum.later.data.LaterListItem;
 import com.crashlytics.android.Crashlytics;
 import java.util.Date;
 
-public class MainActivity extends ListActivity {
+public class MainActivity extends Activity {
 
     private Context context = this;
     private LaterListDataSource dataSource;
@@ -59,8 +60,6 @@ public class MainActivity extends ListActivity {
 
         menuSpinnerItem = menu.findItem(R.id.menu_spinner_view);
         Spinner spinner = (Spinner) menuSpinnerItem.getActionView().findViewById(R.id.spinner_filter);
-
-        //Spinner spinner = (Spinner) findViewById(R.id.spinner_filter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             String[] filterStringArray = getResources().getStringArray(R.array.filter_array);
 
@@ -127,7 +126,7 @@ public class MainActivity extends ListActivity {
         dataSource.close();
 
         cursorAdapter = new LaterListCursorAdapter(this, cursor);
-        setListAdapter(cursorAdapter);
+        listView.setAdapter(cursorAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
