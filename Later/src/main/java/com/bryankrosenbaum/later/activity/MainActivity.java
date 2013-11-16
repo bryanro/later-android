@@ -35,6 +35,7 @@ public class MainActivity extends ActionBarActivity {
     private LaterListCursorAdapter cursorAdapter;
     private boolean firstOnResume;
     private MenuItem menuSpinnerItem;
+    private MenuItem menuCountOfItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +59,8 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
+        menuCountOfItems = menu.findItem(R.id.menu_itemcounter);
 
         menuSpinnerItem = menu.findItem(R.id.menu_spinner_view);
         Spinner spinner = (Spinner) menuSpinnerItem.getActionView().findViewById(R.id.spinner_filter);
@@ -170,12 +173,30 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
+    /**
+     * Refresh the ListView
+     */
     public void refreshList() {
         dataSource.open();
         cursor = dataSource.fetchItems();
         dataSource.close();
 
         cursorAdapter.changeCursor(cursor);
+
+        updateCountOfListItems(cursor.getCount());
+    }
+
+    public void updateCountOfListItems(int count) {
+        int MAX_COUNT_TO_SHOW = 10;
+
+        String countText;
+        if (count <= MAX_COUNT_TO_SHOW) {
+            countText = Integer.toString(count);
+        }
+        else {
+            countText = Integer.toString(MAX_COUNT_TO_SHOW) + "+";
+        }
+        menuCountOfItems.setTitle(countText);
     }
 
     /**

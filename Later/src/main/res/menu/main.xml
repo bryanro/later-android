@@ -18,6 +18,11 @@
         android:orderInCategory="20"
         later:actionLayout="@layout/menu_spinner_filter"
         />
-        <!--android:actionLayout="@layout/menu_spinner_filter"-->
+
+    <item android:id="@+id/menu_itemcounter"
+        android:title="#"
+        later:showAsAction="always"
+        android:orderInCategory="30"
+        />
 
 </menu>
