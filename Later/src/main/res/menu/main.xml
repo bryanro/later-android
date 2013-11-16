@@ -1,4 +1,5 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:later="http://schemas.android.com/apk/res-auto">
 
     <!--
     Determined that the refresh button isn't really needed anymore since the app automatically refreshes in the onResume function.
@@ -13,8 +14,10 @@
 
     <item android:id="@+id/menu_spinner_view"
         android:title="Filter"
-        android:showAsAction="always"
+        later:showAsAction="always"
         android:orderInCategory="20"
-        android:actionLayout="@layout/menu_spinner_filter"
+        later:actionLayout="@layout/menu_spinner_filter"
         />
+        <!--android:actionLayout="@layout/menu_spinner_filter"-->
+
 </menu>

@@ -1,14 +1,13 @@
 package com.bryankrosenbaum.later.activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +26,7 @@ import com.bryankrosenbaum.later.data.LaterListItem;
 import com.crashlytics.android.Crashlytics;
 import java.util.Date;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
 
     private Context context = this;
     private LaterListDataSource dataSource;
@@ -35,7 +34,6 @@ public class MainActivity extends Activity {
     private Cursor cursor;
     private LaterListCursorAdapter cursorAdapter;
     private boolean firstOnResume;
-
     private MenuItem menuSpinnerItem;
 
     @Override
@@ -49,6 +47,9 @@ public class MainActivity extends Activity {
         listView = (ListView) findViewById(android.R.id.list);
 
         firstOnResume = true;
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         initializeList();
     }
