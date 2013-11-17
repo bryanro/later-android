@@ -230,13 +230,9 @@ public class MainActivity extends ActionBarActivity {
                 Log.d("onItemSelected", "You selected item: " + filterStringArray[pos]);
                 String filter = filterStringArray[pos];
 
-                // onItemSelected gets called when the view is being built, so this first time set the selectedFilterText
-                // no need to refresh since refreshList() is already called in
-                if (selectedFilterText == null) {
-                    selectedFilterText = filter;
-                }
-                // only refresh if the filter is changed, so compare against the previously selected filter
-                else if (!filter.equals(selectedFilterText))
+                // onItemSelected gets called when the view is being built when selectedFilterText == null
+                // also refresh if the filter is changed, so compare against the previously selected filter
+                if (selectedFilterText == null || !filter.equals(selectedFilterText))
                 {
                     selectedFilterText = filter;
 
