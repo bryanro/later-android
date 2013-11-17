@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.internal.view.SupportMenuItem;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -36,9 +38,9 @@ public class MainActivity extends ActionBarActivity {
     private Cursor cursor;
     private LaterListCursorAdapter cursorAdapter;
     private boolean firstOnResume;
-    private MenuItem menuSpinnerItem;
-    private MenuItem menuCountOfItems;
-    private MenuItem menuSearchFilter;
+    private SupportMenuItem menuSpinnerItem;
+    private SupportMenuItem menuCountOfItems;
+    private SupportMenuItem menuSearchFilter;
     private String selectedFilterText;
 
     /**
@@ -73,7 +75,7 @@ public class MainActivity extends ActionBarActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
-        menuCountOfItems = menu.findItem(R.id.menu_itemcounter);
+        menuCountOfItems = (SupportMenuItem) menu.findItem(R.id.menu_itemcounter);
         initializeMenuSearch(menu);
         initializeMenuSpinner(menu);
 
@@ -162,6 +164,7 @@ public class MainActivity extends ActionBarActivity {
 
                 final LaterListItem selectedItem = buildLaterListItemFromListItem(view);
 
+                // TODO: implement
                 return true;
             }
         });
@@ -172,21 +175,21 @@ public class MainActivity extends ActionBarActivity {
      * @param menu
      */
     private void initializeMenuSearch(Menu menu) {
-        menuSearchFilter = menu.findItem(R.id.menu_searchfilter);
-        menuSearchFilter.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+        menuSearchFilter = (SupportMenuItem) menu.findItem(R.id.menu_searchfilter);
+        menuSearchFilter.setSupportOnActionExpandListener(new MenuItemCompat.OnActionExpandListener() {
             @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
+            public boolean onMenuItemActionExpand(MenuItem menuItem) {
                 Log.d("onMenuItemActionExpand", "Expanded");
                 return true;
             }
 
             @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
+            public boolean onMenuItemActionCollapse(MenuItem menuItem) {
                 Log.d("onMenuItemActionCollapse", "Collapsed");
-                //refreshList();
                 return true;
             }
         });
+
         SearchView searchView = (SearchView) menuSearchFilter.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -216,7 +219,7 @@ public class MainActivity extends ActionBarActivity {
      * @param menu
      */
     private void initializeMenuSpinner(Menu menu) {
-        menuSpinnerItem = menu.findItem(R.id.menu_spinner_view);
+        menuSpinnerItem = (SupportMenuItem) menu.findItem(R.id.menu_spinner_view);
         Spinner spinner = (Spinner) menuSpinnerItem.getActionView().findViewById(R.id.spinner_filter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             String[] filterStringArray = getResources().getStringArray(R.array.filter_array);
