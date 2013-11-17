@@ -1,6 +1,9 @@
 package com.bryankrosenbaum.later.data;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -71,6 +74,9 @@ public class LaterListDataSource {
      * @return LaterListItem object created
      */
     public LaterListItem createItem(String content) {
+        // open db connection
+        this.open();
+
         ContentValues values = new ContentValues();
 
         values.put(LaterListSQLiteHelper.COLUMN_CONTENT, content);
@@ -84,6 +90,10 @@ public class LaterListDataSource {
         cursor.moveToFirst();
         LaterListItem newListItem = cursorToItem(cursor);
         cursor.close();
+
+        // close db connection
+        this.close();
+
         return newListItem;
     }
 
@@ -93,10 +103,16 @@ public class LaterListDataSource {
      * @param item LaterListItem that will be deleted
      */
     public void deleteItem(LaterListItem item) {
+        // open db connection
+        this.open();
+
         long id = item.getId();
         Log.d("LaterListDataSource", "LaterList item deleted with id: " + id);
         database.delete(LaterListSQLiteHelper.TABLE_LATER_LIST, LaterListSQLiteHelper.COLUMN_ID
                 + " = " + id, null);
+
+        // close db connection
+        this.close();
     }
 
     /**
@@ -104,10 +120,16 @@ public class LaterListDataSource {
      * @param item LaterListItem that will be marked as read
      */
     public void markItemRead(LaterListItem item) {
+        // open db connection
+        this.open();
+
         long id = item.getId();
         ContentValues contentValues = new ContentValues();
         contentValues.put(LaterListSQLiteHelper.COLUMN_STATUS, LaterListItem.STATUS_READ);
         database.update(LaterListSQLiteHelper.TABLE_LATER_LIST, contentValues, LaterListSQLiteHelper.COLUMN_ID + "=" + id, null);
+
+        // close db connection
+        this.close();
     }
 
     /**
@@ -116,6 +138,14 @@ public class LaterListDataSource {
      * @return Cursor containing items
      */
     public Cursor fetchItems() {
+        return fetchItems(null);
+    }
+
+    public Cursor fetchItems(String searchText) {
+
+        // open db connection
+        this.open();
+        /*
         switch (getFilter()) {
             case UNREAD:
                 return fetchUnreadItems();
@@ -125,7 +155,36 @@ public class LaterListDataSource {
                 return fetchReadItems();
             default:
                 return fetchUnreadItems();
+        }*/
+
+        List<String> whereClause = new ArrayList<String>();
+        if (getFilter() == Filter.UNREAD) {
+            whereClause.add(LaterListSQLiteHelper.COLUMN_STATUS + "=" + LaterListItem.STATUS_UNREAD);
         }
+        else if (getFilter() == Filter.READ) {
+            whereClause.add(LaterListSQLiteHelper.COLUMN_STATUS + "=" + LaterListItem.STATUS_READ);
+        }
+
+        if (searchText != null && searchText.length() > 0) {
+            whereClause.add(LaterListSQLiteHelper.COLUMN_CONTENT + " LIKE '%" + searchText + "%'");
+        }
+
+        String where = android.text.TextUtils.join(" AND ", whereClause.toArray());
+
+        Log.d("fetchItems", "where clause: " + where);
+
+        Cursor cursor = database.query(LaterListSQLiteHelper.TABLE_LATER_LIST,
+                allColumns, where,
+                null, null, null,  LaterListSQLiteHelper.COLUMN_ADD_DTM + " asc");
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+
+        // close db connection
+        this.close();
+
+        return cursor;
     }
 
     /**
@@ -182,7 +241,13 @@ public class LaterListDataSource {
      * Delete all items from the database
      */
     public void deleteAll() {
+        // open db connection
+        this.open();
+
         database.delete(LaterListSQLiteHelper.TABLE_LATER_LIST, null, null);
+
+        // close db connection
+        this.close();
     }
 
     /**

@@ -8,11 +8,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.FilterQueryProvider;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -36,7 +38,13 @@ public class MainActivity extends ActionBarActivity {
     private boolean firstOnResume;
     private MenuItem menuSpinnerItem;
     private MenuItem menuCountOfItems;
+    private MenuItem menuSearchFilter;
+    private String selectedFilterText;
 
+    /**
+     * Override onCreate to initialize the activity, including: setting up the datasource and initializing the ListView
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,52 +57,34 @@ public class MainActivity extends ActionBarActivity {
 
         firstOnResume = true;
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        getSupportActionBar().setHomeButtonEnabled(false);
 
         initializeList();
     }
 
+    /**
+     * Override onCreateOptionsMenu to setup each of the ActionBar items
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
         menuCountOfItems = menu.findItem(R.id.menu_itemcounter);
-
-        menuSpinnerItem = menu.findItem(R.id.menu_spinner_view);
-        Spinner spinner = (Spinner) menuSpinnerItem.getActionView().findViewById(R.id.spinner_filter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            String[] filterStringArray = getResources().getStringArray(R.array.filter_array);
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int pos, long id) {
-                Log.d("onItemSelected", "You selected item: " + filterStringArray[pos]);
-                String filter = filterStringArray[pos];
-                if (filter.equals("All")) {
-                    dataSource.setFilter(LaterListDataSource.Filter.ALL);
-                    refreshList();
-                }
-                else if (filter.equals("Unread")) {
-                    dataSource.setFilter(LaterListDataSource.Filter.UNREAD);
-                    refreshList();
-                }
-                else if (filter.equals("Read")) {
-                    dataSource.setFilter(LaterListDataSource.Filter.READ);
-                    refreshList();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        initializeMenuSearch(menu);
+        initializeMenuSpinner(menu);
 
         return true;
     }
 
+    /**
+     * Override onOptionsItemSelected to detect when a menu item is clicked
+     * @param item Menu item selected
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -111,6 +101,9 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Override the onResume method so that the ListView gets refreshed each time the user enters the MainActivity
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -124,10 +117,11 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * Initialize the ListView by setting the OnItemClickListener to open up the website or a prompt
+     */
     public void initializeList() {
-        dataSource.open();
         cursor = dataSource.fetchItems();
-        dataSource.close();
 
         cursorAdapter = new LaterListCursorAdapter(this, cursor);
         listView.setAdapter(cursorAdapter);
@@ -174,20 +168,112 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
+     *
+     * @param menu
+     */
+    private void initializeMenuSearch(Menu menu) {
+        menuSearchFilter = menu.findItem(R.id.menu_searchfilter);
+        menuSearchFilter.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                Log.d("onMenuItemActionExpand", "Expanded");
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                Log.d("onMenuItemActionCollapse", "Collapsed");
+                //refreshList();
+                return true;
+            }
+        });
+        SearchView searchView = (SearchView) menuSearchFilter.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                Log.d("onQueryTextSubmit", "String: " + s);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                Log.d("onQueryTextChange", "String changed to: " + s);
+                cursorAdapter.getFilter().filter(s);
+                return true;
+            }
+        });
+
+        cursorAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence constraint) {
+                return dataSource.fetchItems(constraint.toString());
+            }
+        });
+    }
+
+    /**
+     * Initialize the menu spinner (dropdown) by hooking up the OnItemSelectedListener
+     * @param menu
+     */
+    private void initializeMenuSpinner(Menu menu) {
+        menuSpinnerItem = menu.findItem(R.id.menu_spinner_view);
+        Spinner spinner = (Spinner) menuSpinnerItem.getActionView().findViewById(R.id.spinner_filter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            String[] filterStringArray = getResources().getStringArray(R.array.filter_array);
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                Log.d("onItemSelected", "You selected item: " + filterStringArray[pos]);
+                String filter = filterStringArray[pos];
+
+                // onItemSelected gets called when the view is being built, so this first time set the selectedFilterText
+                // no need to refresh since refreshList() is already called in
+                if (selectedFilterText == null) {
+                    selectedFilterText = filter;
+                }
+                // only refresh if the filter is changed, so compare against the previously selected filter
+                else if (!filter.equals(selectedFilterText))
+                {
+                    selectedFilterText = filter;
+
+                    if (filter.equals("All")) {
+                        dataSource.setFilter(LaterListDataSource.Filter.ALL);
+                        refreshList();
+                    }
+                    else if (filter.equals("Unread")) {
+                        dataSource.setFilter(LaterListDataSource.Filter.UNREAD);
+                        refreshList();
+                    }
+                    else if (filter.equals("Read")) {
+                        dataSource.setFilter(LaterListDataSource.Filter.READ);
+                        refreshList();
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    /**
      * Refresh the ListView
      */
     public void refreshList() {
-        dataSource.open();
         cursor = dataSource.fetchItems();
-        dataSource.close();
 
         cursorAdapter.changeCursor(cursor);
 
         updateCountOfListItems(cursor.getCount());
+
+        menuSearchFilter.collapseActionView();
     }
 
     public void updateCountOfListItems(int count) {
-        int MAX_COUNT_TO_SHOW = 10;
+        int MAX_COUNT_TO_SHOW = 100;
 
         String countText;
         if (count <= MAX_COUNT_TO_SHOW) {
@@ -220,9 +306,7 @@ public class MainActivity extends ActionBarActivity {
      * @param item Listview item that will be marked as read
      */
     private void markItemAsRead (LaterListItem item) {
-        dataSource.open();
         dataSource.markItemRead(item);
-        dataSource.close();
     }
 
     /**

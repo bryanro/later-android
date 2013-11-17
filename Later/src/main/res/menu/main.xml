@@ -12,8 +12,16 @@
         android:visible="false"
         />
 
+    <item android:id="@+id/menu_searchfilter"
+        android:title="@string/search"
+        android:icon="@android:drawable/ic_menu_search"
+        later:showAsAction="collapseActionView|ifRoom"
+        android:orderInCategory="10"
+        later:actionViewClass="android.support.v7.widget.SearchView"
+        />
+
     <item android:id="@+id/menu_spinner_view"
-        android:title="Filter"
+        android:title="@string/filter"
         later:showAsAction="always"
         android:orderInCategory="20"
         later:actionLayout="@layout/menu_spinner_filter"
