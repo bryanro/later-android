@@ -145,17 +145,6 @@ public class LaterListDataSource {
 
         // open db connection
         this.open();
-        /*
-        switch (getFilter()) {
-            case UNREAD:
-                return fetchUnreadItems();
-            case ALL:
-                return fetchAllItems();
-            case READ:
-                return fetchReadItems();
-            default:
-                return fetchUnreadItems();
-        }*/
 
         List<String> whereClause = new ArrayList<String>();
         if (getFilter() == Filter.UNREAD) {
@@ -183,56 +172,6 @@ public class LaterListDataSource {
 
         // close db connection
         this.close();
-
-        return cursor;
-    }
-
-    /**
-     * Query the database to get all of the items (both read and unread)
-     *
-     * @return Cursor containing all items
-     */
-    public Cursor fetchAllItems() {
-        Cursor cursor = database.query(LaterListSQLiteHelper.TABLE_LATER_LIST,
-                allColumns, null, null, null, null, LaterListSQLiteHelper.COLUMN_ADD_DTM + " asc");
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-
-        return cursor;
-    }
-
-    /**
-     * Query the database to get all of the unread items
-     *
-     * @return Cursor containing unread items
-     */
-    public Cursor fetchUnreadItems() {
-        Cursor cursor = database.query(LaterListSQLiteHelper.TABLE_LATER_LIST,
-                allColumns, LaterListSQLiteHelper.COLUMN_STATUS + "=" + LaterListItem.STATUS_UNREAD,
-                null, null, null,  LaterListSQLiteHelper.COLUMN_ADD_DTM + " asc");
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-
-        return cursor;
-    }
-
-    /**
-     * Query the database to get all of the read items
-     *
-     * @return Cursor containing read items
-     */
-    public Cursor fetchReadItems() {
-        Cursor cursor = database.query(LaterListSQLiteHelper.TABLE_LATER_LIST,
-                allColumns, LaterListSQLiteHelper.COLUMN_STATUS + "=" + LaterListItem.STATUS_READ,
-                null, null, null,  LaterListSQLiteHelper.COLUMN_ADD_DTM + " asc");
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
 
         return cursor;
     }
