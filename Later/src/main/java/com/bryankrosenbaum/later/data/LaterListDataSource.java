@@ -133,6 +133,23 @@ public class LaterListDataSource {
     }
 
     /**
+     * Mark an item as unread
+     * @param item LaterListItem that will be marked as unread
+     */
+    public void markItemUnread(LaterListItem item) {
+        // open db connection
+        this.open();
+
+        long id = item.getId();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(LaterListSQLiteHelper.COLUMN_STATUS, LaterListItem.STATUS_UNREAD);
+        database.update(LaterListSQLiteHelper.TABLE_LATER_LIST, contentValues, LaterListSQLiteHelper.COLUMN_ID + "=" + id, null);
+
+        // close db connection
+        this.close();
+    }
+
+    /**
      * Query the database to get items based on what the filter is set to (ALL, READ, UNREAD)
      *
      * @return Cursor containing items
