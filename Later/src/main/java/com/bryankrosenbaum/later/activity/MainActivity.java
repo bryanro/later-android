@@ -41,7 +41,6 @@ public class MainActivity extends ActionBarActivity {
     private LaterListCursorAdapter cursorAdapter;
     private boolean firstOnResume;
     private SupportMenuItem menuSpinnerItem;
-    private SupportMenuItem menuCountOfItems;
     private SupportMenuItem menuSearchFilter;
     private String selectedFilterText;
     private ActionMode mActionMode;
@@ -65,6 +64,7 @@ public class MainActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         getSupportActionBar().setHomeButtonEnabled(false);
+        getSupportActionBar().setTitle("Later");
 
         initializeList();
     }
@@ -80,7 +80,6 @@ public class MainActivity extends ActionBarActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
-        menuCountOfItems = (SupportMenuItem) menu.findItem(R.id.menu_itemcounter);
         initializeMenuSearch(menu);
         initializeMenuSpinner(menu);
 
@@ -100,11 +99,7 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_settings:
-                return true;
-            case R.id.menu_refresh: {
-                refreshList();
                 break;
-            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -174,8 +169,7 @@ public class MainActivity extends ActionBarActivity {
                         if (selectedItem.getStatus() == LaterListItem.STATUS_UNREAD) {
                             menu.findItem(R.id.contextmenu_markread).setVisible(true);
                             menu.findItem(R.id.contextmenu_markunread).setVisible(false);
-                        }
-                        else {
+                        } else {
                             menu.findItem(R.id.contextmenu_markread).setVisible(false);
                             menu.findItem(R.id.contextmenu_markunread).setVisible(true);
                         }
@@ -189,7 +183,7 @@ public class MainActivity extends ActionBarActivity {
 
                     @Override
                     public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-                        switch(menuItem.getItemId()) {
+                        switch (menuItem.getItemId()) {
                             case R.id.contextmenu_markread:
                                 dataSource.markItemRead(selectedItem);
                                 refreshList();
@@ -315,20 +309,44 @@ public class MainActivity extends ActionBarActivity {
         menuSearchFilter.collapseActionView();
     }
 
+    /**
+     * Update the display showing the count of items in the ListView, currently displayed in the ActionBar's subtitle.
+     * If the count exceeds the MAX_COUNT_TO_SHOW, then it will show [MAX_COUNT_TO_SHOW]+.  (e.g.: "100+")
+     * The current format is: [count|MAX_COUNT_TO_SHOW+] ["read"|"unread"|""] item[s].
+     *
+     * @param count Count of items that should be displayed
+     */
     public void updateCountOfListItems(int count) {
         int MAX_COUNT_TO_SHOW = 100;
+        StringBuilder subtitleStringBuilder = new StringBuilder();
 
-        String countText;
         if (count <= MAX_COUNT_TO_SHOW) {
-            countText = Integer.toString(count);
+            subtitleStringBuilder.append(count);
         } else {
-            countText = Integer.toString(MAX_COUNT_TO_SHOW) + "+";
+            subtitleStringBuilder.append(MAX_COUNT_TO_SHOW).append("+");
         }
-        menuCountOfItems.setTitle(countText);
+
+        switch(dataSource.getFilter()) {
+            case READ:
+                subtitleStringBuilder.append(" read");
+                break;
+            case UNREAD:
+                subtitleStringBuilder.append(" unread");
+                break;
+            case ALL:
+                break;
+        }
+
+        subtitleStringBuilder.append(" item");
+        if (count != 1) {
+            subtitleStringBuilder.append("s");
+        }
+
+        getSupportActionBar().setSubtitle(subtitleStringBuilder.toString());
     }
 
     /**
-     * Open the URI by creating a browser intent and mark the listview item as read
+     * Open the URI by creating a browser intent and mark the ListView item as read
      *
      * @param url URI string that will be opened in the browser
      * @param item Listview item that contains the URI that will be marked as read
