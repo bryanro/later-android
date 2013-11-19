@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:later="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/contextmenu_markread"
+        android:title="Mark Read"
+        later:showAsAction="always"
+        android:visible="true"
+        />
+
+    <item android:id="@+id/contextmenu_markunread"
+        android:title="Mark Unread"
+        later:showAsAction="always"
+        android:visible="true"
+        />
+</menu>

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.internal.view.SupportMenuItem;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
@@ -28,6 +29,7 @@ import com.bryankrosenbaum.later.data.LaterListDataSource;
 import com.bryankrosenbaum.later.data.LaterListItem;
 
 import com.crashlytics.android.Crashlytics;
+
 import java.util.Date;
 
 public class MainActivity extends ActionBarActivity {
@@ -42,9 +44,11 @@ public class MainActivity extends ActionBarActivity {
     private SupportMenuItem menuCountOfItems;
     private SupportMenuItem menuSearchFilter;
     private String selectedFilterText;
+    private ActionMode mActionMode;
 
     /**
      * Override onCreate to initialize the activity, including: setting up the datasource and initializing the ListView
+     *
      * @param savedInstanceState
      */
     @Override
@@ -67,6 +71,7 @@ public class MainActivity extends ActionBarActivity {
 
     /**
      * Override onCreateOptionsMenu to setup each of the ActionBar items
+     *
      * @param menu
      * @return
      */
@@ -84,6 +89,7 @@ public class MainActivity extends ActionBarActivity {
 
     /**
      * Override onOptionsItemSelected to detect when a menu item is clicked
+     *
      * @param item Menu item selected
      * @return
      */
@@ -113,8 +119,7 @@ public class MainActivity extends ActionBarActivity {
         // only call refresh if this is not the first call to onResume (when the app starts up)
         if (firstOnResume) {
             firstOnResume = false;
-        }
-        else {
+        } else {
             refreshList();
         }
     }
@@ -158,19 +163,60 @@ public class MainActivity extends ActionBarActivity {
         });
 
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
-            public boolean onItemLongClick(AdapterView<?> parent, View view,
-                                           int pos, long id) {
-
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 final LaterListItem selectedItem = buildLaterListItemFromListItem(view);
+                ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+                    @Override
+                    public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+                        // Inflate a menu resource providing context menu items
+                        getMenuInflater().inflate(R.menu.context_menu, menu);
+                        if (selectedItem.getStatus() == LaterListItem.STATUS_UNREAD) {
+                            menu.findItem(R.id.contextmenu_markread).setVisible(true);
+                            menu.findItem(R.id.contextmenu_markunread).setVisible(false);
+                        }
+                        else {
+                            menu.findItem(R.id.contextmenu_markread).setVisible(false);
+                            menu.findItem(R.id.contextmenu_markunread).setVisible(true);
+                        }
+                        return true;
+                    }
 
-                // TODO: implement
+                    @Override
+                    public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+                        switch(menuItem.getItemId()) {
+                            case R.id.contextmenu_markread:
+                                dataSource.markItemRead(selectedItem);
+                                refreshList();
+                                mActionMode.finish();
+                                return true;
+                            case R.id.contextmenu_markunread:
+                                dataSource.markItemUnread(selectedItem);
+                                refreshList();
+                                mActionMode.finish();
+                                return true;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public void onDestroyActionMode(ActionMode actionMode) {
+                        mActionMode = null;
+                    }
+                };
+                mActionMode = startSupportActionMode(actionModeCallback);
                 return true;
             }
         });
     }
 
     /**
+     * Initialize the search menu item in the ActionBar
      *
      * @param menu
      */
@@ -216,6 +262,7 @@ public class MainActivity extends ActionBarActivity {
 
     /**
      * Initialize the menu spinner (dropdown) by hooking up the OnItemSelectedListener
+     *
      * @param menu
      */
     private void initializeMenuSpinner(Menu menu) {
@@ -232,19 +279,16 @@ public class MainActivity extends ActionBarActivity {
 
                 // onItemSelected gets called when the view is being built when selectedFilterText == null
                 // also refresh if the filter is changed, so compare against the previously selected filter
-                if (selectedFilterText == null || !filter.equals(selectedFilterText))
-                {
+                if (selectedFilterText == null || !filter.equals(selectedFilterText)) {
                     selectedFilterText = filter;
 
                     if (filter.equals("All")) {
                         dataSource.setFilter(LaterListDataSource.Filter.ALL);
                         refreshList();
-                    }
-                    else if (filter.equals("Unread")) {
+                    } else if (filter.equals("Unread")) {
                         dataSource.setFilter(LaterListDataSource.Filter.UNREAD);
                         refreshList();
-                    }
-                    else if (filter.equals("Read")) {
+                    } else if (filter.equals("Read")) {
                         dataSource.setFilter(LaterListDataSource.Filter.READ);
                         refreshList();
                     }
@@ -277,8 +321,7 @@ public class MainActivity extends ActionBarActivity {
         String countText;
         if (count <= MAX_COUNT_TO_SHOW) {
             countText = Integer.toString(count);
-        }
-        else {
+        } else {
             countText = Integer.toString(MAX_COUNT_TO_SHOW) + "+";
         }
         menuCountOfItems.setTitle(countText);
@@ -304,7 +347,7 @@ public class MainActivity extends ActionBarActivity {
      *
      * @param item Listview item that will be marked as read
      */
-    private void markItemAsRead (LaterListItem item) {
+    private void markItemAsRead(LaterListItem item) {
         dataSource.markItemRead(item);
     }
 
@@ -330,8 +373,7 @@ public class MainActivity extends ActionBarActivity {
         int status = 0;
         try {
             status = Integer.parseInt(statusTextview.getText().toString());
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             Log.e("MainActivity", "Exception parsing int (" + statusTextview.getText().toString() + "): " + ex.getMessage());
         }
 
