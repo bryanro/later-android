@@ -4,11 +4,15 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.internal.view.SupportMenuItem;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.SearchView;
@@ -17,9 +21,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.FilterQueryProvider;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,11 +53,12 @@ public class MainActivity extends BaseActionBarActivity {
     private Cursor cursor;
     private LaterListCursorAdapter cursorAdapter;
     private boolean firstOnResume;
-    private SupportMenuItem menuSpinnerItem;
-    private SupportMenuItem menuCountOfItems;
     private SupportMenuItem menuSearchFilter;
     private String selectedFilterText;
     private ActionMode mActionMode;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     /**
      * Override onCreate to initialize the activity, including: setting up the datasource and initializing the ListView
@@ -71,8 +76,12 @@ public class MainActivity extends BaseActionBarActivity {
 
         firstOnResume = true;
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        getSupportActionBar().setHomeButtonEnabled(false);
+        initializeDrawer();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setTitle("Later");
+        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
         initializeList();
     }
@@ -88,9 +97,7 @@ public class MainActivity extends BaseActionBarActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
-        menuCountOfItems = (SupportMenuItem) menu.findItem(R.id.menu_itemcounter);
         initializeMenuSearch(menu);
-        initializeMenuSpinner(menu);
 
         return true;
     }
@@ -106,15 +113,31 @@ public class MainActivity extends BaseActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
+        // Pass the event to ActionBarDrawerToggle, if it returns
+        // true, then it has handled the app icon touch event
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
         switch (item.getItemId()) {
             case R.id.action_settings:
-                return true;
-            case R.id.menu_refresh: {
-                refreshList();
                 break;
-            }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     /**
@@ -180,12 +203,19 @@ public class MainActivity extends BaseActionBarActivity {
                         // Inflate a menu resource providing context menu items
                         getMenuInflater().inflate(R.menu.context_menu, menu);
                         if (selectedItem.getStatus() == LaterListItem.STATUS_UNREAD) {
-                            menu.findItem(R.id.contextmenu_markread).setVisible(true);
-                            menu.findItem(R.id.contextmenu_markunread).setVisible(false);
-                        }
-                        else {
-                            menu.findItem(R.id.contextmenu_markread).setVisible(false);
-                            menu.findItem(R.id.contextmenu_markunread).setVisible(true);
+                            try {
+                                menu.findItem(R.id.contextmenu_markread).setVisible(true);
+                                menu.findItem(R.id.contextmenu_markunread).setVisible(false);
+                            } catch (NullPointerException nullPointerEx) {
+                                Log.e("onCreateActionMode", "Null Pointer: " + nullPointerEx.getMessage());
+                            }
+                        } else {
+                            try {
+                                menu.findItem(R.id.contextmenu_markread).setVisible(false);
+                                menu.findItem(R.id.contextmenu_markunread).setVisible(true);
+                            } catch (NullPointerException nullPointerEx) {
+                                Log.e("onCreateActionMode", "Null Pointer: " + nullPointerEx.getMessage());
+                            }
                         }
                         return true;
                     }
@@ -197,7 +227,7 @@ public class MainActivity extends BaseActionBarActivity {
 
                     @Override
                     public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-                        switch(menuItem.getItemId()) {
+                        switch (menuItem.getItemId()) {
                             case R.id.contextmenu_markread:
                                 dataSource.markItemRead(selectedItem);
                                 refreshList();
@@ -221,6 +251,9 @@ public class MainActivity extends BaseActionBarActivity {
                 return true;
             }
         });
+
+        // update display count of list items
+        updateCountOfListItems(listView.getCount());
     }
 
     /**
@@ -269,21 +302,25 @@ public class MainActivity extends BaseActionBarActivity {
     }
 
     /**
-     * Initialize the menu spinner (dropdown) by hooking up the OnItemSelectedListener
      *
-     * @param menu
      */
-    private void initializeMenuSpinner(Menu menu) {
-        menuSpinnerItem = (SupportMenuItem) menu.findItem(R.id.menu_spinner_view);
-        Spinner spinner = (Spinner) menuSpinnerItem.getActionView().findViewById(R.id.spinner_filter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    private void initializeDrawer() {
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.drawer_listview);
+
+        ArrayAdapter<CharSequence> drawerAdapter = ArrayAdapter.createFromResource(this, R.array.filter_array,
+                android.R.layout.simple_spinner_dropdown_item);
+
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(drawerAdapter);
+        // Set the list's click listener
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             String[] filterStringArray = getResources().getStringArray(R.array.filter_array);
 
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int pos, long id) {
-                Log.d("onItemSelected", "You selected item: " + filterStringArray[pos]);
-                String filter = filterStringArray[pos];
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("onItemSelected", "You selected item: " + filterStringArray[position]);
+                String filter = filterStringArray[position];
 
                 // onItemSelected gets called when the view is being built when selectedFilterText == null
                 // also refresh if the filter is changed, so compare against the previously selected filter
@@ -293,21 +330,39 @@ public class MainActivity extends BaseActionBarActivity {
                     if (filter.equals("All")) {
                         dataSource.setFilter(LaterListDataSource.Filter.ALL);
                         refreshList();
+                        mDrawerLayout.closeDrawer(mDrawerList);
                     } else if (filter.equals("Unread")) {
                         dataSource.setFilter(LaterListDataSource.Filter.UNREAD);
                         refreshList();
+                        mDrawerLayout.closeDrawer(mDrawerList);
                     } else if (filter.equals("Read")) {
                         dataSource.setFilter(LaterListDataSource.Filter.READ);
                         refreshList();
+                        mDrawerLayout.closeDrawer(mDrawerList);
                     }
                 }
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
         });
+
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+        ) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
     /**
@@ -323,20 +378,44 @@ public class MainActivity extends BaseActionBarActivity {
         menuSearchFilter.collapseActionView();
     }
 
+    /**
+     * Update the display showing the count of items in the ListView, currently displayed in the ActionBar's subtitle.
+     * If the count exceeds the MAX_COUNT_TO_SHOW, then it will show [MAX_COUNT_TO_SHOW]+.  (e.g.: "100+")
+     * The current format is: [count|MAX_COUNT_TO_SHOW+] ["read"|"unread"|""] item[s].
+     *
+     * @param count Count of items that should be displayed
+     */
     public void updateCountOfListItems(int count) {
         int MAX_COUNT_TO_SHOW = 100;
+        StringBuilder subtitleStringBuilder = new StringBuilder();
 
-        String countText;
         if (count <= MAX_COUNT_TO_SHOW) {
-            countText = Integer.toString(count);
+            subtitleStringBuilder.append(count);
         } else {
-            countText = Integer.toString(MAX_COUNT_TO_SHOW) + "+";
+            subtitleStringBuilder.append(MAX_COUNT_TO_SHOW).append("+");
         }
-        menuCountOfItems.setTitle(countText);
+
+        switch(dataSource.getFilter()) {
+            case READ:
+                subtitleStringBuilder.append(" read");
+                break;
+            case UNREAD:
+                subtitleStringBuilder.append(" unread");
+                break;
+            case ALL:
+                break;
+        }
+
+        subtitleStringBuilder.append(" item");
+        if (count != 1) {
+            subtitleStringBuilder.append("s");
+        }
+
+        getSupportActionBar().setSubtitle(subtitleStringBuilder.toString());
     }
 
     /**
-     * Open the URI by creating a browser intent and mark the listview item as read
+     * Open the URI by creating a browser intent and mark the ListView item as read
      *
      * @param url URI string that will be opened in the browser
      * @param item Listview item that contains the URI that will be marked as read
