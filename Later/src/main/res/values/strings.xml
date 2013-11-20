@@ -10,6 +10,8 @@
     <string name="item_added_fail">Error adding item to Later. Please try again.</string>
     <string name="search">Search</string>
     <string name="filter">Filter</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
     <string-array name="filter_array">
         <item>Unread</item>
         <item>All</item>

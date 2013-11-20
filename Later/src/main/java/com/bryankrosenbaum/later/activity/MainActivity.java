@@ -4,11 +4,15 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.internal.view.SupportMenuItem;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.SearchView;
@@ -17,9 +21,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.FilterQueryProvider;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,10 +44,12 @@ public class MainActivity extends ActionBarActivity {
     private Cursor cursor;
     private LaterListCursorAdapter cursorAdapter;
     private boolean firstOnResume;
-    private SupportMenuItem menuSpinnerItem;
     private SupportMenuItem menuSearchFilter;
     private String selectedFilterText;
     private ActionMode mActionMode;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     /**
      * Override onCreate to initialize the activity, including: setting up the datasource and initializing the ListView
@@ -62,9 +68,12 @@ public class MainActivity extends ActionBarActivity {
 
         firstOnResume = true;
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        getSupportActionBar().setHomeButtonEnabled(false);
+        initializeDrawer();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle("Later");
+        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
         initializeList();
     }
@@ -81,7 +90,6 @@ public class MainActivity extends ActionBarActivity {
         getMenuInflater().inflate(R.menu.main, menu);
 
         initializeMenuSearch(menu);
-        initializeMenuSpinner(menu);
 
         return true;
     }
@@ -97,11 +105,31 @@ public class MainActivity extends ActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
+        // Pass the event to ActionBarDrawerToggle, if it returns
+        // true, then it has handled the app icon touch event
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
         switch (item.getItemId()) {
             case R.id.action_settings:
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     /**
@@ -167,11 +195,19 @@ public class MainActivity extends ActionBarActivity {
                         // Inflate a menu resource providing context menu items
                         getMenuInflater().inflate(R.menu.context_menu, menu);
                         if (selectedItem.getStatus() == LaterListItem.STATUS_UNREAD) {
-                            menu.findItem(R.id.contextmenu_markread).setVisible(true);
-                            menu.findItem(R.id.contextmenu_markunread).setVisible(false);
+                            try {
+                                menu.findItem(R.id.contextmenu_markread).setVisible(true);
+                                menu.findItem(R.id.contextmenu_markunread).setVisible(false);
+                            } catch (NullPointerException nullPointerEx) {
+                                Log.e("onCreateActionMode", "Null Pointer: " + nullPointerEx.getMessage());
+                            }
                         } else {
-                            menu.findItem(R.id.contextmenu_markread).setVisible(false);
-                            menu.findItem(R.id.contextmenu_markunread).setVisible(true);
+                            try {
+                                menu.findItem(R.id.contextmenu_markread).setVisible(false);
+                                menu.findItem(R.id.contextmenu_markunread).setVisible(true);
+                            } catch (NullPointerException nullPointerEx) {
+                                Log.e("onCreateActionMode", "Null Pointer: " + nullPointerEx.getMessage());
+                            }
                         }
                         return true;
                     }
@@ -207,6 +243,9 @@ public class MainActivity extends ActionBarActivity {
                 return true;
             }
         });
+
+        // update display count of list items
+        updateCountOfListItems(listView.getCount());
     }
 
     /**
@@ -255,21 +294,25 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * Initialize the menu spinner (dropdown) by hooking up the OnItemSelectedListener
      *
-     * @param menu
      */
-    private void initializeMenuSpinner(Menu menu) {
-        menuSpinnerItem = (SupportMenuItem) menu.findItem(R.id.menu_spinner_view);
-        Spinner spinner = (Spinner) menuSpinnerItem.getActionView().findViewById(R.id.spinner_filter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    private void initializeDrawer() {
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.drawer_listview);
+
+        ArrayAdapter<CharSequence> drawerAdapter = ArrayAdapter.createFromResource(this, R.array.filter_array,
+                android.R.layout.simple_spinner_dropdown_item);
+
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(drawerAdapter);
+        // Set the list's click listener
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             String[] filterStringArray = getResources().getStringArray(R.array.filter_array);
 
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int pos, long id) {
-                Log.d("onItemSelected", "You selected item: " + filterStringArray[pos]);
-                String filter = filterStringArray[pos];
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("onItemSelected", "You selected item: " + filterStringArray[position]);
+                String filter = filterStringArray[position];
 
                 // onItemSelected gets called when the view is being built when selectedFilterText == null
                 // also refresh if the filter is changed, so compare against the previously selected filter
@@ -279,21 +322,39 @@ public class MainActivity extends ActionBarActivity {
                     if (filter.equals("All")) {
                         dataSource.setFilter(LaterListDataSource.Filter.ALL);
                         refreshList();
+                        mDrawerLayout.closeDrawer(mDrawerList);
                     } else if (filter.equals("Unread")) {
                         dataSource.setFilter(LaterListDataSource.Filter.UNREAD);
                         refreshList();
+                        mDrawerLayout.closeDrawer(mDrawerList);
                     } else if (filter.equals("Read")) {
                         dataSource.setFilter(LaterListDataSource.Filter.READ);
                         refreshList();
+                        mDrawerLayout.closeDrawer(mDrawerList);
                     }
                 }
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
         });
+
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+        ) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
     /**
