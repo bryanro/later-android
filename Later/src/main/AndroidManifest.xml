@@ -14,7 +14,8 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppCompatTheme" >
+        android:theme="@style/AppCompatTheme"
+        android:name="com.bryankrosenbaum.later.LaterApplication">
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait"

@@ -5,30 +5,38 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+
+import javax.inject.Inject;
 
 /**
  * Created by Bryan on 10/29/13.
  */
 public class LaterListDataSource {
 
+
+    @Inject
+    protected LaterListSQLiteHelper dbHelper;
+
     // Filter
     public enum Filter { ALL, UNREAD, READ };
+
     private Filter filter;
+
     public Filter getFilter() {
         return filter;
     }
+
     public void setFilter(Filter filter) {
         this.filter = filter;
     }
 
     // Database and db fields
     private SQLiteDatabase database;
-    private LaterListSQLiteHelper dbHelper;
+
     private String[] allColumns = {
             LaterListSQLiteHelper.COLUMN_ID,
             LaterListSQLiteHelper.COLUMN_CONTENT,
@@ -39,11 +47,9 @@ public class LaterListDataSource {
     /**
      * Constructor that initializes the dbHelper and sets the filter default to UNREAD
      *
-     * @param context
      */
-    public LaterListDataSource(Context context) {
-        Log.d("LaterListDataSource", "initialize dbHelper in constructor");
-        dbHelper = new LaterListSQLiteHelper(context);
+    public LaterListDataSource() {
+        Log.d("LaterListDataSource", "initialize");
 
         // initialize filter to UNREAD
         setFilter(Filter.UNREAD);
