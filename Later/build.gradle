@@ -1,3 +1,7 @@
+import java.util.regex.Pattern
+
+def versionCode = getVersionCodeAndIncrementNext();
+
 buildscript {
     repositories {
         mavenCentral()
@@ -28,7 +32,7 @@ android {
     buildToolsVersion "17.0.0"
 
     defaultConfig {
-        minSdkVersion 11
+        minSdkVersion 7
         targetSdkVersion 18
 
         testPackageName "com.bryankrosenbaum.later.test"
@@ -48,4 +52,46 @@ dependencies {
     testCompile 'com.squareup:fest-android:1.0.+'
     testCompile 'org.mockito:mockito-all:1.9.+'
     testCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
+}
+
+def getVersionCodeAndIncrementNext() {
+
+    //Gets the version name from the manifest
+    def manifestFile = file("src/main/AndroidManifest.xml")
+    def patternVersionName = Pattern.compile("versionName=\"(.+)\"")
+    def manifestText = manifestFile.getText()
+    def matcherVersionName = patternVersionName.matcher(manifestText)
+    matcherVersionName.find()
+    def versionName = matcherVersionName.group(1)
+    println("Version Name requested - returning " + versionName)
+
+    incrementVersion()
+
+    // increment version for next time
+    return versionName
+}
+
+def incrementVersion () {
+    println(":increaseVersion - Incrementing Package and Manifest Version...")
+    def manifestFile = file("src/main/AndroidManifest.xml")
+    def patternVersionCode = Pattern.compile("versionCode=\"(\\d+)\"")
+    def manifestText = manifestFile.getText()
+    def matcherVersionCode = patternVersionCode.matcher(manifestText)
+    matcherVersionCode.find()
+    def versionCode = Integer.parseInt(matcherVersionCode.group(1))
+    println("group(0): " + matcherVersionCode.group(0))
+    println("group(1): " + matcherVersionCode.group(1))
+    def manifestContent = matcherVersionCode.replaceAll("versionCode=\"" + ++versionCode + "\"")
+
+    manifestFile.write(manifestContent)
+
+    def patternVersionNumber = Pattern.compile("versionName=\"(\\d+)\\.(\\d+)\\.(\\d+)\"")
+    manifestText = manifestFile.getText()
+    def matcherVersionNumber = patternVersionNumber.matcher(manifestText)
+    matcherVersionNumber.find()
+    def majorVersion = Integer.parseInt(matcherVersionNumber.group(1))
+    def minorVersion = Integer.parseInt(matcherVersionNumber.group(2))
+    def buildVersion = Integer.parseInt(matcherVersionNumber.group(3))
+    manifestContent = matcherVersionNumber.replaceAll("versionName=\"" + majorVersion + "." + minorVersion + "." + ++buildVersion + "\"")
+    manifestFile.write(manifestContent)
 }
