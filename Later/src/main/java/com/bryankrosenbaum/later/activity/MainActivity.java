@@ -36,11 +36,20 @@ import com.crashlytics.android.Crashlytics;
 
 import java.util.Date;
 
-public class MainActivity extends ActionBarActivity {
+import javax.inject.Inject;
+
+import butterknife.InjectView;
+
+public class MainActivity extends BaseActionBarActivity {
 
     private Context context = this;
-    private LaterListDataSource dataSource;
-    private ListView listView;
+
+    @Inject
+    protected LaterListDataSource dataSource;
+
+    @InjectView(android.R.id.list)
+    protected ListView listView;
+
     private Cursor cursor;
     private LaterListCursorAdapter cursorAdapter;
     private boolean firstOnResume;
@@ -63,7 +72,6 @@ public class MainActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_main);
 
-        dataSource = new LaterListDataSource(this);
         listView = (ListView) findViewById(android.R.id.list);
 
         firstOnResume = true;

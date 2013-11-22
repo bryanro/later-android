@@ -1,6 +1,5 @@
 package com.bryankrosenbaum.later.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteException;
@@ -13,7 +12,12 @@ import android.widget.Toast;
 import com.bryankrosenbaum.later.R;
 import com.bryankrosenbaum.later.data.LaterListDataSource;
 
-public class ReceiveShareActivity extends Activity {
+import javax.inject.Inject;
+
+public class ReceiveShareActivity extends BaseActivity {
+
+    @Inject
+    protected LaterListDataSource dataSource;
 
     /**
      * Receive the shared intent and process it if it's an ACTION_SEND intent, then close the activity when done processing.
@@ -88,7 +92,6 @@ public class ReceiveShareActivity extends Activity {
 
         if (sharedText != null) {
             try {
-                LaterListDataSource dataSource = new LaterListDataSource(this);
                 dataSource.open();
                 dataSource.createItem(sharedText);
                 dataSource.close();
