@@ -1,7 +1,5 @@
 import java.util.regex.Pattern
 
-def versionCode = getVersionCodeAndIncrementNext();
-
 buildscript {
     repositories {
         mavenCentral()
@@ -35,6 +33,9 @@ android {
         minSdkVersion 11
         targetSdkVersion 18
 
+        versionCode getVersionCodeAndIncrement()
+        versionName getVersionNameAndIncrement()
+
         testPackageName "com.bryankrosenbaum.later.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
@@ -54,44 +55,39 @@ dependencies {
     testCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
-def getVersionCodeAndIncrementNext() {
-
-    //Gets the version name from the manifest
-    def manifestFile = file("src/main/AndroidManifest.xml")
-    def patternVersionName = Pattern.compile("versionName=\"(.+)\"")
-    def manifestText = manifestFile.getText()
-    def matcherVersionName = patternVersionName.matcher(manifestText)
-    matcherVersionName.find()
-    def versionName = matcherVersionName.group(1)
-    println("Version Name requested - returning " + versionName)
-
-    incrementVersion()
-
-    // increment version for next time
-    return versionName
-}
-
-def incrementVersion () {
-    println(":increaseVersion - Incrementing Package and Manifest Version...")
+def getVersionCodeAndIncrement() {
+    println(":incrementVersion - Incrementing Version Code...")
     def manifestFile = file("src/main/AndroidManifest.xml")
     def patternVersionCode = Pattern.compile("versionCode=\"(\\d+)\"")
     def manifestText = manifestFile.getText()
     def matcherVersionCode = patternVersionCode.matcher(manifestText)
     matcherVersionCode.find()
-    def versionCode = Integer.parseInt(matcherVersionCode.group(1))
-    println("group(0): " + matcherVersionCode.group(0))
-    println("group(1): " + matcherVersionCode.group(1))
-    def manifestContent = matcherVersionCode.replaceAll("versionCode=\"" + ++versionCode + "\"")
-
+    def mVersionCode = Integer.parseInt(matcherVersionCode.group(1))
+    def mNextVersionCode = mVersionCode + 1
+    def manifestContent = matcherVersionCode.replaceAll("versionCode=\"" + mNextVersionCode + "\"")
+    println(":getVersionCodeAndIncrement - current versionCode=" + mVersionCode);
+    println(":getVersionCodeAndIncrement - next versionCode=" + mNextVersionCode);
     manifestFile.write(manifestContent)
 
+    return mVersionCode
+}
+
+def getVersionNameAndIncrement() {
+    println(":incrementVersion - Incrementing Version Name...")
+    def manifestFile = file("src/main/AndroidManifest.xml")
     def patternVersionNumber = Pattern.compile("versionName=\"(\\d+)\\.(\\d+)\\.(\\d+)\"")
-    manifestText = manifestFile.getText()
+    def manifestText = manifestFile.getText()
     def matcherVersionNumber = patternVersionNumber.matcher(manifestText)
     matcherVersionNumber.find()
     def majorVersion = Integer.parseInt(matcherVersionNumber.group(1))
     def minorVersion = Integer.parseInt(matcherVersionNumber.group(2))
     def buildVersion = Integer.parseInt(matcherVersionNumber.group(3))
-    manifestContent = matcherVersionNumber.replaceAll("versionName=\"" + majorVersion + "." + minorVersion + "." + ++buildVersion + "\"")
+    def mVersionName = majorVersion + "." + minorVersion + "." + buildVersion
+    def mNextVersionName = majorVersion + "." + minorVersion + "." + (buildVersion + 1)
+    def manifestContent = matcherVersionNumber.replaceAll("versionName=\"" + mNextVersionName + "\"")
+    println(":getVersionNameAndIncrement - current versionName=" + mVersionName);
+    println(":getVersionNameAndIncrement - new versionName=" + mNextVersionName);
     manifestFile.write(manifestContent)
+
+    return mVersionName
 }
