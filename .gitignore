@@ -15,6 +15,3 @@
 *.ipr
 *~
 *.swp
-
-# Project
-signing.properties
