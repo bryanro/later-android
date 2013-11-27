@@ -119,7 +119,6 @@ if (propFile.canRead()) {
  * Example:
  *   1) Before the build the AndroidManfist.xml has versionCode=7
  *   2) The AndroidManifest.xml will be modified so that versionCode=8
- * @return current versionCode from AndroidManifest.xml
  */
 
 task incrementVersionCode << {
