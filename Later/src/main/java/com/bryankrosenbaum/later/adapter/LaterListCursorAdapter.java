@@ -25,6 +25,7 @@ public class LaterListCursorAdapter extends CursorAdapter {
 
     public static final String DATE_FORMAT_PRESENTABLE = "K:mm a | MMM d";
     private static final SimpleDateFormat presentableDateFormat = new SimpleDateFormat(DATE_FORMAT_PRESENTABLE);
+    private static int PRIMARY_TEXT_SIZE = 16;
 
     public LaterListCursorAdapter(Activity context, Cursor c) {
         super (context, c);
@@ -46,10 +47,12 @@ public class LaterListCursorAdapter extends CursorAdapter {
         String content = cursor.getString(cursor.getColumnIndex(LaterListSQLiteHelper.COLUMN_CONTENT));
         String formattedContent = UrlFinder.formatContent(content);
         textviewContent.setText(Html.fromHtml(formattedContent));
+        textviewContent.setTextSize(PRIMARY_TEXT_SIZE);
 
         TextView textviewTime = (TextView) view.findViewById(R.id.listitem_textview_time);
         Date dateAddDtm = LaterListItem.getDateFromFormattedLong(cursor.getLong(cursor.getColumnIndex(LaterListSQLiteHelper.COLUMN_ADD_DTM)));
         textviewTime.setText(presentableDateFormat.format(dateAddDtm));
+        textviewTime.setTextSize(PRIMARY_TEXT_SIZE - 2);
 
         TextView textviewId = (TextView) view.findViewById(R.id.listitem_textview_id);
         String id = cursor.getString(cursor.getColumnIndex(LaterListSQLiteHelper.COLUMN_ID));
@@ -58,5 +61,9 @@ public class LaterListCursorAdapter extends CursorAdapter {
         TextView textviewStatus = (TextView) view.findViewById(R.id.listitem_textview_status);
         int status = cursor.getInt(cursor.getColumnIndex(LaterListSQLiteHelper.COLUMN_STATUS));
         textviewStatus.setText(Integer.toString(status));
+    }
+
+    public void setTextSize(int textSize) {
+        PRIMARY_TEXT_SIZE = textSize;
     }
 }

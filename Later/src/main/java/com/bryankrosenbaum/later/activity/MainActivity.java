@@ -4,16 +4,17 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.internal.view.SupportMenuItem;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -32,6 +33,7 @@ import com.bryankrosenbaum.later.R;
 import com.bryankrosenbaum.later.data.LaterListDataSource;
 import com.bryankrosenbaum.later.data.LaterListItem;
 
+import com.bryankrosenbaum.later.util.UrlFinder;
 import com.crashlytics.android.Crashlytics;
 
 import java.util.Date;
@@ -121,7 +123,9 @@ public class MainActivity extends BaseActionBarActivity {
         }
 
         switch (item.getItemId()) {
-            case R.id.action_settings:
+            case R.id.menu_settings:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -162,6 +166,9 @@ public class MainActivity extends BaseActionBarActivity {
         cursor = dataSource.fetchItems();
 
         cursorAdapter = new LaterListCursorAdapter(this, cursor);
+
+        updateDisplayWithPreferences();
+
         listView.setAdapter(cursorAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -369,6 +376,8 @@ public class MainActivity extends BaseActionBarActivity {
      * Refresh the ListView
      */
     public void refreshList() {
+        updateDisplayWithPreferences();
+
         cursor = dataSource.fetchItems();
 
         cursorAdapter.changeCursor(cursor);
@@ -466,5 +475,20 @@ public class MainActivity extends BaseActionBarActivity {
 
         LaterListItem item = new LaterListItem(id, content, addDtm, status);
         return item;
+    }
+
+    /**
+     * Get preferences and update the display for:
+     * - link color
+     * - font size
+     */
+    public void updateDisplayWithPreferences() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        String linkColorPref = sharedPref.getString("link_color", "");
+        UrlFinder.setLinkColor(linkColorPref);
+
+        int textSizePref = Integer.parseInt(sharedPref.getString("font_size", ""));
+        cursorAdapter.setTextSize(textSizePref);
     }
 }

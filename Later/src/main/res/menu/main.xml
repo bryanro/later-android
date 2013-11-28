@@ -5,8 +5,12 @@
         android:title="@string/search"
         android:icon="@android:drawable/ic_menu_search"
         later:showAsAction="collapseActionView|ifRoom"
-        android:orderInCategory="10"
         later:actionViewClass="android.support.v7.widget.SearchView"
         />
+
+    <item android:id="@+id/menu_settings"
+        android:title="Settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        later:showAsAction="ifRoom" />
 
 </menu>

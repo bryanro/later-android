@@ -1,5 +1,7 @@
 package com.bryankrosenbaum.later.util;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.bryankrosenbaum.later.R;
@@ -14,7 +16,7 @@ import java.util.regex.Pattern;
 public class UrlFinder {
 
     public static final String URL_REGEX_PATTERN = "((https?:\\/\\/)?[\\w-]{1,}(\\.[\\w-]{2,})+(:\\d+)?(\\/\\S*)?)[^.,)\\]\\*\\s]";
-    public static final String LINK_COLOR = "#006DB4";
+    public static String LINK_COLOR = "#006DB4";
     public static final String TWITTER_URL_PREFIX = "http://twitter.com/";
 
     /**
@@ -60,5 +62,9 @@ public class UrlFinder {
         }
 
         return urlList.toArray(new String[urlList.size()]);
+    }
+
+    public static void setLinkColor(String linkColor) {
+        LINK_COLOR = linkColor;
     }
 }

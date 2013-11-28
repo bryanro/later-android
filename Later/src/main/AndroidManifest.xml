@@ -3,41 +3,48 @@
     package="com.bryankrosenbaum.later"
     android:versionCode="80"
     android:versionName="1.3.1" >
-
     <uses-sdk
         android:minSdkVersion="11"
         android:targetSdkVersion="18" />
-
-    <uses-permission android:name="android.permission.INTERNET"/>
-
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
+        android:name="com.bryankrosenbaum.later.LaterApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppCompatTheme"
-        android:name="com.bryankrosenbaum.later.LaterApplication">
+        android:theme="@style/AppCompatTheme" >
         <activity
-            android:name=".activity.MainActivity"
-            android:screenOrientation="portrait"
-            android:label="@string/app_name" >
+            android:name="com.bryankrosenbaum.later.activity.MainActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.ReceiveShareActivity"
-            android:windowSoftInputMode="adjustResize"
+            android:name="com.bryankrosenbaum.later.activity.ReceiveShareActivity"
             android:label="@string/title_activity_receive_share"
-            android:theme="@android:style/Theme.NoDisplay">
-
+            android:theme="@android:style/Theme.NoDisplay"
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="b6c0a51fb3f8ed84844eeb0c60afc75d3af16283"/>
+        <activity
+            android:name="com.bryankrosenbaum.later.activity.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="com.bryankrosenbaum.later.activity.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.bryankrosenbaum.later.activity.MainActivity" />
+        </activity>
+        <meta-data
+            android:name="com.crashlytics.ApiKey"
+            android:value="b6c0a51fb3f8ed84844eeb0c60afc75d3af16283" />
     </application>
 
 </manifest>
