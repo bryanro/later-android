@@ -488,7 +488,13 @@ public class MainActivity extends BaseActionBarActivity {
         String linkColorPref = sharedPref.getString("link_color", "");
         UrlFinder.setLinkColor(linkColorPref);
 
-        int textSizePref = Integer.parseInt(sharedPref.getString("font_size", ""));
-        cursorAdapter.setTextSize(textSizePref);
+        try {
+            int textSizePref = Integer.parseInt(sharedPref.getString("font_size", ""));
+            cursorAdapter.setTextSize(textSizePref);
+        }
+        catch (NumberFormatException numberFormatEx) {
+            Log.e("updateDisplayWithPreferences", "font_size preference is not set or set incorrectly to '"
+                    + sharedPref.getString("font_size", "") + "' and threw a NumberFormatException: " + numberFormatEx.getMessage());
+        }
     }
 }
