@@ -2,7 +2,7 @@
     <ListPreference
         android:key="font_size"
         android:title="@string/pref_title_font_size"
-        android:defaultValue="16dp"
+        android:defaultValue="16"
         android:entries="@array/pref_font_size_list_titles"
         android:entryValues="@array/pref_font_size_list_values"
         android:negativeButtonText="@null"
