@@ -164,7 +164,15 @@ public class LaterListDataSource {
         return fetchItems(null);
     }
 
+    public Cursor fetchItems(boolean isAscending) {
+        return fetchItems(null, isAscending);
+    }
+
     public Cursor fetchItems(String searchText) {
+        return fetchItems(searchText, null);
+    }
+
+    public Cursor fetchItems(String searchText, Boolean isAscending) {
 
         // open db connection
         this.open();
@@ -185,9 +193,11 @@ public class LaterListDataSource {
 
         Log.d("fetchItems", "where clause: " + where);
 
+        String ascendingDescending = getAscendingDescending(isAscending);
+
         Cursor cursor = database.query(LaterListSQLiteHelper.TABLE_LATER_LIST,
                 allColumns, where,
-                null, null, null,  LaterListSQLiteHelper.COLUMN_ADD_DTM + " asc");
+                null, null, null,  LaterListSQLiteHelper.COLUMN_ADD_DTM + ascendingDescending);
 
         if (cursor != null) {
             cursor.moveToFirst();
@@ -197,6 +207,20 @@ public class LaterListDataSource {
         this.close();
 
         return cursor;
+    }
+
+    private String getAscendingDescending(Boolean isAscending) {
+        // use defaults if isAscending is not specified
+        if (isAscending == null) {
+            // if on UNREAD filter show ascending, otherwise show descending
+            if (getFilter() == Filter.UNREAD) {
+                isAscending = true;
+            }
+            else {
+                isAscending = false;
+            }
+        }
+        return isAscending ? " ASC" : " DESC";
     }
 
     /**
