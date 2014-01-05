@@ -35,6 +35,7 @@ import com.bryankrosenbaum.later.data.LaterListItem;
 
 import com.bryankrosenbaum.later.util.UrlFinder;
 import com.crashlytics.android.Crashlytics;
+import com.google.analytics.tracking.android.EasyTracker;
 
 import java.util.Date;
 
@@ -102,6 +103,18 @@ public class MainActivity extends BaseActionBarActivity {
         initializeMenuSearch(menu);
 
         return true;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EasyTracker.getInstance(this).activityStart(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EasyTracker.getInstance(this).activityStop(this);
     }
 
     /**

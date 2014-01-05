@@ -67,6 +67,7 @@ dependencies {
     compile 'com.squareup.dagger:dagger:1.1.+'
     compile 'com.squareup.dagger:dagger-compiler:1.1.+'
     compile 'com.jakewharton:butterknife:3.0.+'
+    compile files('libs/libGoogleAnalyticsServices.jar')
 
     /*testCompile 'junit:junit:4.10'
     testCompile 'org.robolectric:robolectric:2.2.+'
