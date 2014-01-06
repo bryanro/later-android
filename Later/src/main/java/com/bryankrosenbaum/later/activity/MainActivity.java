@@ -73,6 +73,10 @@ public class MainActivity extends BaseActionBarActivity {
         super.onCreate(savedInstanceState);
         Crashlytics.start(this);
 
+        // set default preferences if first time starting application
+        // (the last parameter being false means it won't overwrite preferences that are already set)
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+
         setContentView(R.layout.activity_main);
 
         listView = (ListView) findViewById(android.R.id.list);
