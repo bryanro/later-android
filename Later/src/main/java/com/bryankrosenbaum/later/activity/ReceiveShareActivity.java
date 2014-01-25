@@ -11,6 +11,10 @@ import android.widget.Toast;
 
 import com.bryankrosenbaum.later.R;
 import com.bryankrosenbaum.later.data.LaterListDataSource;
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Fields;
+
+import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -43,6 +47,13 @@ public class ReceiveShareActivity extends BaseActivity {
             if ("text/plain".equals(type)) {
                 if (handleSendText(intent)) {
                     Toast.makeText(getApplicationContext(), itemAddSuccessMessage, Toast.LENGTH_SHORT).show();
+
+                    // google analytics for tracking clicked links
+                    HashMap<String, String> hitParameters = new HashMap<String, String>();
+                    hitParameters.put(Fields.HIT_TYPE, "event");
+                    hitParameters.put(Fields.EVENT_CATEGORY, "link");
+                    hitParameters.put(Fields.EVENT_ACTION, "add");
+                    EasyTracker.getInstance(this).send(hitParameters);
                 }
                 else {
                     Toast.makeText(getApplicationContext(), itemAddFailMessage, Toast.LENGTH_SHORT).show();

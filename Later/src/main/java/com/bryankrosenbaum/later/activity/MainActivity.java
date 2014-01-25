@@ -36,8 +36,10 @@ import com.bryankrosenbaum.later.data.LaterListItem;
 import com.bryankrosenbaum.later.util.UrlFinder;
 import com.crashlytics.android.Crashlytics;
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Fields;
 
 import java.util.Date;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -453,6 +455,13 @@ public class MainActivity extends BaseActionBarActivity {
         startActivity(browserIntent);
 
         markItemAsRead(item);
+
+        // google analytics for tracking clicked links
+        HashMap<String, String> hitParameters = new HashMap<String, String>();
+        hitParameters.put(Fields.HIT_TYPE, "event");
+        hitParameters.put(Fields.EVENT_CATEGORY, "link");
+        hitParameters.put(Fields.EVENT_ACTION, "open");
+        EasyTracker.getInstance(this).send(hitParameters);
     }
 
     /**
