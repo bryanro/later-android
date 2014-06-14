@@ -15,6 +15,7 @@ import android.support.v4.internal.view.SupportMenuItem;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -41,18 +42,12 @@ import com.google.analytics.tracking.android.Fields;
 import java.util.Date;
 import java.util.HashMap;
 
-import javax.inject.Inject;
-
-import butterknife.InjectView;
-
-public class MainActivity extends BaseActionBarActivity {
+public class MainActivity extends ActionBarActivity {
 
     private Context context = this;
 
-    @Inject
     protected LaterListDataSource dataSource;
 
-    @InjectView(android.R.id.list)
     protected ListView listView;
 
     private Cursor cursor;
@@ -80,7 +75,7 @@ public class MainActivity extends BaseActionBarActivity {
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
 
         setContentView(R.layout.activity_main);
-
+        dataSource = new LaterListDataSource(context);
         listView = (ListView) findViewById(android.R.id.list);
 
         firstOnResume = true;

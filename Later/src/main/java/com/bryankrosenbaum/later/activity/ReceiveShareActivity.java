@@ -1,5 +1,6 @@
 package com.bryankrosenbaum.later.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteException;
@@ -16,11 +17,8 @@ import com.google.analytics.tracking.android.Fields;
 
 import java.util.HashMap;
 
-import javax.inject.Inject;
+public class ReceiveShareActivity extends Activity {
 
-public class ReceiveShareActivity extends BaseActivity {
-
-    @Inject
     protected LaterListDataSource dataSource;
 
     /**
@@ -103,6 +101,7 @@ public class ReceiveShareActivity extends BaseActivity {
 
         if (sharedText != null) {
             try {
+                dataSource = new LaterListDataSource(this);
                 dataSource.open();
                 dataSource.createItem(sharedText);
                 dataSource.close();

@@ -5,20 +5,17 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-
-import javax.inject.Inject;
 
 /**
  * Created by Bryan on 10/29/13.
  */
 public class LaterListDataSource {
 
-
-    @Inject
     protected LaterListSQLiteHelper dbHelper;
 
     // Filter
@@ -48,8 +45,10 @@ public class LaterListDataSource {
      * Constructor that initializes the dbHelper and sets the filter default to UNREAD
      *
      */
-    public LaterListDataSource() {
+    public LaterListDataSource(Context context) {
         Log.d("LaterListDataSource", "initialize");
+
+        dbHelper = new LaterListSQLiteHelper(context);
 
         // initialize filter to UNREAD
         setFilter(Filter.UNREAD);

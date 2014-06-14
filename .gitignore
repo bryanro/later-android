@@ -15,5 +15,6 @@
 *.ipr
 *~
 *.swp
+/build
 
 *.pdn

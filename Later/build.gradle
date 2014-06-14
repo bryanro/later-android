@@ -19,16 +19,12 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
+        classpath 'com.android.tools.build:gradle:0.11.+'
         classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
-        classpath 'com.squareup.gradle:gradle-android-test-plugin:0.9.1-SNAPSHOT'
-        classpath 'org.notlocalhost.gradle:gradle-calabash-android-plugin:0.1.+'
     }
 }
 apply plugin: 'android'
 apply plugin: 'crashlytics'
-apply plugin: 'android-test'
-apply plugin: 'calabash-test'
 
 repositories {
     mavenCentral()
@@ -38,14 +34,11 @@ repositories {
 
 android {
     compileSdkVersion 18
-    buildToolsVersion "17.0.0"
+    buildToolsVersion "19.1.0"
 
     defaultConfig {
         minSdkVersion 11
         targetSdkVersion 18
-
-        testPackageName "com.bryankrosenbaum.later.test"
-        testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
 
     signingConfigs {
@@ -64,16 +57,7 @@ android {
 dependencies {
     compile 'com.crashlytics.android:crashlytics:1.+'
     compile "com.android.support:appcompat-v7:18.0.+"
-    compile 'com.squareup.dagger:dagger:1.1.+'
-    compile 'com.squareup.dagger:dagger-compiler:1.1.+'
-    compile 'com.jakewharton:butterknife:3.0.+'
     compile files('libs/libGoogleAnalyticsServices.jar')
-
-    /*testCompile 'junit:junit:4.10'
-    testCompile 'org.robolectric:robolectric:2.2.+'
-    testCompile 'com.squareup:fest-android:1.0.+'
-    testCompile 'org.mockito:mockito-all:1.9.+'
-    testCompile 'com.google.dexmaker:dexmaker-mockito:1.0'*/
 }
 
 /**
