@@ -13,4 +13,9 @@
         android:icon="@android:drawable/ic_menu_preferences"
         later:showAsAction="ifRoom" />
 
+    <item android:id="@+id/menu_backuprestore"
+        android:title="Backup/Restore"
+        android:icon="@android:drawable/ic_menu_save"
+        later:showAsAction="never" />
+
 </menu>

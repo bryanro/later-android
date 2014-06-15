@@ -138,8 +138,10 @@ public class MainActivity extends ActionBarActivity {
 
         switch (item.getItemId()) {
             case R.id.menu_settings:
-                Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                startActivity(settingsIntent);
+                startActivity(new Intent(this, SettingsActivity.class));
+                break;
+            case R.id.menu_backuprestore:
+                startActivity(new Intent(this, BackupRestoreActivity.class));
                 break;
         }
         return super.onOptionsItemSelected(item);

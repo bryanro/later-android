@@ -55,9 +55,9 @@ android {
 }
 
 dependencies {
-    compile 'com.crashlytics.android:crashlytics:1.+'
-    compile "com.android.support:appcompat-v7:18.0.+"
     compile files('libs/libGoogleAnalyticsServices.jar')
+    compile 'com.crashlytics.android:crashlytics:1.+'
+    compile 'com.android.support:appcompat-v7:19.+'
 }
 
 /**
@@ -72,7 +72,7 @@ def propFile = new File("signing.properties")
 if (propFile.canRead()) {
     props.load(new FileInputStream(propFile))
 
-    if (props!= null
+    if (props != null
             && props.containsKey("KEYSTORE_FILE")
             && props.containsKey("KEYSTORE_PASSWORD")
             && props.containsKey("KEY_ALIAS")
@@ -84,13 +84,11 @@ if (propFile.canRead()) {
             android.signingConfigs.release.storePassword = props["KEYSTORE_PASSWORD"]
             android.signingConfigs.release.keyAlias = props["KEY_ALIAS"]
             android.signingConfigs.release.keyPassword = props["KEY_PASSWORD"]
-        }
-        else {
+        } else {
             println("keystore file not found: " + props["KEYSTORE_FILE"])
             android.buildTypes.release.signingConfig = null
         }
-    }
-    else {
+    } else {
         println("signing.properties found but some entries missing")
         android.buildTypes.release.signingConfig = null
     }

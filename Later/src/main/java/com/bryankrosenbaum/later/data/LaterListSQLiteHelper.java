@@ -16,7 +16,7 @@ public class LaterListSQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ADD_DTM = "add_dtm";
     public static final String COLUMN_STATUS = "status";
 
-    private static final String DATABASE_NAME = "later_list.db";
+    public static final String DATABASE_NAME = "later_list.db";
     private static final int DATABASE_VERSION = 1;
 
     // Database creation sql statement

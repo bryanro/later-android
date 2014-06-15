@@ -12,6 +12,14 @@
     <string name="filter">Filter</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
+    <string name="title_activity_backup_restore">Backup and Restore</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="overwrite_backup">Overwrite Backup</string>
+
     <string-array name="filter_array">
         <item>Unread</item>
         <item>All</item>
