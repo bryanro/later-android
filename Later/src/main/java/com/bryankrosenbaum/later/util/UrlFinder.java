@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  */
 public class UrlFinder {
 
-    public static final String URL_REGEX_PATTERN = "((https?:\\/\\/)?[\\w-]{1,}(\\.[\\w-]{2,})+(:\\d+)?(\\/\\S*)?)[^.,)\\]\\*\\s]";
+    public static final String URL_REGEX_PATTERN = "((https?:\\/\\/)?[\\w-]{1,}(\\.[\\w-]{1,})+(:\\d+)?(\\/\\S*)?)[^.,)\\]\\*\\s]";
     public static String LINK_COLOR = "#006DB4";
     public static final String TWITTER_URL_PREFIX = "http://twitter.com/";
 
